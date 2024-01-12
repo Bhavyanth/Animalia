@@ -24,7 +24,5 @@ public class AnimalController {
         return animalService.addAnimal(animal);
     }
 
-    // find Animal by ID
-    // Delete an Animal By ID
-    // Edit an ANimal by ID
+
 }

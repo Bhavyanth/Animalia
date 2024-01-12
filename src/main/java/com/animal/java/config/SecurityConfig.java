@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
@@ -49,13 +50,11 @@ public class SecurityConfig {
         return httpSecurity.cors().and()
                 .csrf().disable()
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/auth/**")
+                        .requestMatchers("/api/v1/auth/**")
                         .permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/subreddit")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/animals")
                         .permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/posts/")
-                        .permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/posts/**")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/**")
                         .permitAll()
                         .requestMatchers("/v2/api-docs",
                                 "/configuration/ui",

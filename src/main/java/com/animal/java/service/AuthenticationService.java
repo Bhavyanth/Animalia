@@ -8,10 +8,14 @@ import com.animal.java.dto.LoginRequest;
 import com.animal.java.dto.RefreshTokenRequest;
 import com.animal.java.dto.SignupRequest;
 import com.animal.java.exception.ApplicationException;
+import com.animal.java.model.EmailContext;
 import com.animal.java.model.User;
 import com.animal.java.model.VerificationToken;
 import com.animal.java.security.JwtProvider;
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -27,6 +31,9 @@ import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
+import static com.animal.java.utils.ValueUtils.authUrl;
+import static com.animal.java.utils.ValueUtils.host;
+
 @Service
 @AllArgsConstructor
 @Transactional
@@ -37,18 +44,26 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final JwtProvider jwtProvider;
     private final RefreshTokenService refreshTokenService;
+    private final MailService mailService;
 
     public void signup(SignupRequest signupRequest){
         User user = User.builder()
                 .username(signupRequest.getUsername())
                 .email(signupRequest.getEmail())
-                .password(signupRequest.getPassword())
+                .password(passwordEncoder.encode(signupRequest.getPassword()))
                 .created(Instant.now())
                 .enabled(Boolean.FALSE).build();
 
         userRepository.save(user);
-
         String token = generateVerificationToken(user);
+        EmailContext context = generateNotification(user, token);
+        mailService.sendEmail(context);
+    }
+
+    private EmailContext generateNotification(User user, String token) {
+        return new EmailContext("[Animalia] Please activate your account", user.getEmail(),
+                "Thank you for signing up to Animalia, "+
+                "Please use the below link to activate your account and explore the world of animals! "+ host + authUrl +token);
     }
 
     private String generateVerificationToken(User user) {
